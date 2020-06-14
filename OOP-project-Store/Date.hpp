@@ -16,11 +16,13 @@ enum Month
 	January = 1, February, March, April, May, June, July,
 	August, September, October, November, December
 };
+
 istream& operator >>(istream& is, const Month& month)
 {
 	is >>(char*) month;
 	return is;
 }
+
 class Date
 {
 	Month month;
@@ -29,23 +31,23 @@ class Date
 public:
 	Date();
 	Date(unsigned day, Month month, unsigned year);
+
 	Month getMonth()const;
 	unsigned getYear()const;
 	unsigned getDay()const;
+
 	void setMonth(Month newMonth);
 	void setYear(unsigned newYear);
 	void setDay(unsigned newDay);
+
 	bool isLeapYear()const;
 	unsigned convertToDays()const;
 	bool isLater(const Date& other)const;
 	void print()const;
-	void printInFile(ofstream& stream);
-	void addFromFile(ifstream& stream, const char* filename);
-	void setDateByString(const char* string);
-
+	void printInFile(ofstream& stream)const;
+	
 	friend ostream& operator << (ostream& os, const Date& date);
 	friend bool operator==(const Date& lhs, const Date& rhs);
-
 	friend istream& operator>>(istream& is, Date& date);
 };
 
@@ -189,33 +191,9 @@ bool operator==(const Date& lhs, const Date& rhs)
 	return ((lhs.year == rhs.year) && (lhs.month == rhs.month) && (lhs.day == rhs.day));
 }
 
-void Date::printInFile(ofstream& stream)
+void Date::printInFile(ofstream& stream)const
 {
 	stream << this->day << "/"<< this->month << "/" << this->year;
-}
-
-void Date::setDateByString(const char* string)
-{
-	unsigned len = strlen(string);
-	for (unsigned i = 0; i < len; i++)
-	{
-		if (string[i] >= '0' && string[i] <= '9')
-		{ 
-			this->day = string[i];
-		}
-	}
-}
-
-void Date::addFromFile(ifstream& stream,const char* filename)
-{
-	char* buffer = new (nothrow)char [1024];
-	stream.open(filename, ios::in);
-	for (unsigned k = 1; k < 1023; k++)
-	{
-		stream >> buffer[k];
-	}
-	this->setDateByString(buffer);
-	delete[]buffer;
 }
 
 istream& operator>>(istream& is, Date& date)

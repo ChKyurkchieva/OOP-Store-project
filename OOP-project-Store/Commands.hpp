@@ -120,7 +120,7 @@ void testFiles()
 	myfile.close();
 }
 
-Store& store()
+const Store& store()
 {
 	Date date(1, January, 2020);
 	Date newDate(20, February, 2021);

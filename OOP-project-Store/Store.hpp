@@ -20,7 +20,7 @@ public:
 	~Store();
 
 	void print()const;
-	void printInFile(ofstream& stream);
+	void printInFile(ofstream& stream)const;
 	void add(const Product& newProduct);
 	void remove(const Product& productToRemove);
 	void cleanFromStore(const Date& expiryDate);
@@ -98,7 +98,7 @@ void Store::print()const
 	}
 }
 
-void Store::printInFile(ofstream& stream)
+void Store::printInFile(ofstream& stream)const
 {
 	for (unsigned i = 0; i < this->size; i++)
 	{

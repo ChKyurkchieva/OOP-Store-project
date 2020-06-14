@@ -4,7 +4,6 @@
 
 #include"Date.hpp"
 
-
 class Product
 {
 private:
@@ -44,7 +43,7 @@ public:
 	void setAmount(unsigned newAmount);
 
 	void print()const;
-	void printInFile(ofstream& stream);
+	void printInFile(ofstream& stream)const;
 
 	friend bool operator==(const Product& lhs, const Product& rhs);
 
@@ -244,7 +243,7 @@ bool operator==(const Product& lhs, const Product& rhs)
 		(lhs.measure==rhs.measure));
 }
 
-void Product::printInFile(ofstream& stream)
+void Product::printInFile(ofstream& stream)const
 {
 	stream << "Name of product: ";
 	stream << this->getName() << endl;
