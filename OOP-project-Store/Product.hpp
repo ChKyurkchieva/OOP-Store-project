@@ -1,9 +1,9 @@
 #define _CRT_SECURE_NO_WARNINGS
-#include<iostream>
+
 #include<cstring>
 
 #include"Date.hpp"
-#include"Location.hpp"
+
 
 class Product
 {
@@ -11,30 +11,29 @@ private:
 	char *name;// name of the product
 	char *producedBy;//name of the producer
 	char *comment;
+	
 	Date expiryDate;//expiry date of the product
 	Date acceptanceDate;//date of entry into the storehouse
-	bool measure;
 	unsigned amount;//amount of the product in the storehouse
-	Location productLocation;//location of the product in the storehouse
+	bool measure;//if 1-kg, if is 0-ml
 
 	void copyFrom(const Product& other);//function, which copy the information about a product to another product
 	void free();// function, which free allocated memory
 public:
 	Product();//default constructor
-	Product(const char *_name, const char *_producedBy, const char *_comment, Date& _expiryDate,
-		Date& _acceptanceDate, bool _measure, unsigned _amount, Location& _productLocation);//constructor with parameters
+	Product(const char *_name, const char *_producedBy, const char *_comment, const Date& _acceptanceDate, 
+		const Date& _expiryDate, bool _measure, unsigned _amount);//constructor with parameters
 	Product(const Product& other);//copy constructor
 	Product& operator=(const Product& other);//operator =
 	~Product();//destructor
 
-	char* getName()const;
-	char* getProducedBy()const;
-	char* getComment()const;
-	Date getExpiryDate()const;
-	Date getAcceptanceDate()const;
+	const char* getName()const;
+	const char* getProducedBy()const;
+	const char* getComment()const;
+	const Date& getExpiryDate()const;
+	const Date& getAcceptanceDate()const;
 	bool getMeasure()const;
 	unsigned getAmount()const;
-	Location getLocation()const;
 
 	void setName(const char* newName);
 	void setProducedBy(const char* newProducedBy);
@@ -43,31 +42,36 @@ public:
 	void setAcceptanceDate(const Date& newADate);
 	void setMeasure(bool newMeasure);
 	void setAmount(unsigned newAmount);
-	void setLocation(const Location& newProductionLocation);
 
 	void print()const;
+	void printInFile(ofstream& stream);
+
+	friend bool operator==(const Product& lhs, const Product& rhs);
+
+	friend ofstream& operator<<(ofstream& out, const Product& product);
+	friend istream& operator>>(istream& in, Product& product);
 
 };
 
 void Product::copyFrom(const Product& other)
 {
 	unsigned nameLength = strlen(other.name);
-	this->name = new char[nameLength + 1];
+	this->name = new (nothrow) char[nameLength + 1];
 	strcpy(this->name, other.name);
 
 	unsigned producedByLength = strlen(other.producedBy);
-	this->producedBy = new char[producedByLength + 1];
+	this->producedBy = new (nothrow) char[producedByLength + 1];
 	strcpy(this->producedBy, other.producedBy);
 
 	unsigned commentLength = strlen(other.comment);
-	this->comment = new char[commentLength + 1];
+	this->comment = new (nothrow) char[commentLength + 1];
 	strcpy(this->comment, other.comment);
 
 	this->expiryDate = other.expiryDate;
 	this->acceptanceDate = other.acceptanceDate;
 	this->measure = other.measure;
 	this->amount = other.amount;
-	this->productLocation = other.productLocation;
+
 }
 
 void Product::free()
@@ -79,39 +83,39 @@ void Product::free()
 
 Product::Product()
 {
-	this->name = new char[1];
+	this->name = new (nothrow) char[1];
 	this->name[0] = '\0';
-	this->producedBy = new char[1];
+	this->producedBy = new (nothrow) char[1];
 	this->producedBy[0] = '\0';
-	this->comment = new char[1];
+	this->comment = new (nothrow) char[1];
 	this->comment[0] = '\0';
-	this->expiryDate = Date(January, 1, 2001);
-	this->acceptanceDate = Date(January, 1, 2000);
+	this->expiryDate = Date(1,January, 2001);
+	this->acceptanceDate = Date(1, January, 2000);
 	this->measure = 0;
 	this->amount = 0;
-	this->productLocation = Location(0, 0, 0);
+	
 }
 
-Product::Product(const char *_name, const char *_producedBy, const char *_comment, Date& _expiryDate,
-	Date& _acceptanceDate, bool _measure, unsigned _amount, Location& _productLocation)
+Product::Product(const char *_name, const char *_producedBy, const char *_comment, const Date& _acceptanceDate, 
+	const Date& _expiryDate, bool _measure, unsigned _amount)
 {
 	unsigned nameLength = strlen(_name);
-	this->name = new char[nameLength + 1];
+	this->name = new (nothrow) char[nameLength + 1];
 	strcpy(this->name, _name);
 
 	unsigned producedByLength = strlen(_producedBy);
-	this->producedBy = new char[producedByLength + 1];
-	strcpy(this->name, _name);
+	this->producedBy = new (nothrow) char[producedByLength + 1];
+	strcpy(this->producedBy, _producedBy);
 
-	unsigned commentLength = strlen(comment);
-	this->name = new char[commentLength + 1];
+	unsigned commentLength = strlen(_comment);
+	this->comment = new (nothrow) char[commentLength + 1];
 	strcpy(this->comment, _comment);
 
 	this->expiryDate = _expiryDate;
 	this->acceptanceDate = _acceptanceDate;
 	this->measure = _measure;
 	this->amount = _amount;
-	this->productLocation = _productLocation;
+
 }
 
 Product::Product(const Product& other)
@@ -134,27 +138,27 @@ Product::~Product()
 	free();
 }
 
-char* Product::getName()const
+const char* Product::getName()const
 {
 	return this->name;
 }
 
-char* Product::getProducedBy()const
+const char* Product::getProducedBy()const
 {
 	return this->producedBy;
 }
 
-char* Product::getComment()const
+const char* Product::getComment()const
 {
 	return this->comment;
 }
 
-Date Product::getExpiryDate()const
+const Date& Product::getExpiryDate()const
 {
 	return this->expiryDate;
 }
 
-Date Product::getAcceptanceDate()const
+const Date& Product::getAcceptanceDate()const
 {
 	return this->acceptanceDate;
 }
@@ -169,17 +173,12 @@ unsigned Product::getAmount()const
 	return this->amount;
 }
 
-Location Product::getLocation()const
-{
-	return this->productLocation;
-}
-
 void Product::setName(const char* newName)
 {
 	unsigned newNameLength = strlen(newName);
 	delete[]name;
 	name = nullptr;
-	this->name = new char[newNameLength + 1];
+	this->name = new (nothrow) char[newNameLength + 1];
 	strcpy(this->name, newName);
 	this->name[newNameLength] = '\0';
 }
@@ -189,7 +188,7 @@ void Product::setProducedBy(const char* newProducedBy)
 	unsigned newProducedByLength = strlen(newProducedBy);
 	delete[] producedBy;
 	producedBy = nullptr;
-	this->producedBy = new char[newProducedByLength + 1];
+	this->producedBy = new (nothrow) char[newProducedByLength + 1];
 	strcpy(this->producedBy, newProducedBy);
 	this->producedBy[newProducedByLength] = '\0';
 }
@@ -199,7 +198,7 @@ void Product::setComment(const char* newComment)
 	unsigned newCommentLength = strlen(newComment);
 	delete[] comment;
 	comment = nullptr;
-	this->comment = new char[newCommentLength + 1];
+	this->comment = new (nothrow) char[newCommentLength + 1];
 	strcpy(this->comment, newComment);
 	this->comment[newCommentLength] = '\0';
 }
@@ -224,11 +223,6 @@ void Product::setAmount(unsigned newAmount)
 	this->amount = newAmount;
 }
 
-void Product::setLocation(const Location& newProductionLocation)
-{
-	this->productLocation = newProductionLocation;
-}
-
 void Product::print()const
 {
 	cout << "Name of product: ";
@@ -237,10 +231,45 @@ void Product::print()const
 	cout << this->getProducedBy() << endl;
 	cout << "The amount of the product: ";
 	cout << this->getAmount() << endl;
-	cout << "The location of the product: ";
-	cout << this->getLocation() << endl;
 	cout << "The acceptance date of the product: ";
 	cout << this->getAcceptanceDate() << endl;
-	cout << " The expiry date of the product: ";
+	cout << "The expiry date of the product: ";
 	cout << this->getExpiryDate() << endl;
 }
+
+bool operator==(const Product& lhs, const Product& rhs)
+{
+	return (strcmp(lhs.name, rhs.name) == 0 && 
+		strcmp(lhs.producedBy, rhs.producedBy) == 0 &&
+		(lhs.measure==rhs.measure));
+}
+
+void Product::printInFile(ofstream& stream)
+{
+	stream << "Name of product: ";
+	stream << this->getName() << endl;
+	stream<< "The name of producer: ";
+	stream << this->getProducedBy() << endl;
+	stream << "The amount of the product: ";
+	stream << this->getAmount() << endl;
+	stream << "The acceptance date of the product: ";
+	stream << this->getAcceptanceDate() << endl;
+	stream << " The expiry date of the product: ";
+	stream << this->getExpiryDate() << endl;
+}
+
+ofstream& operator<<(ofstream& out, const Product& product)
+{
+	out << product.name << product.producedBy << product.comment << product.acceptanceDate;
+	out << product.expiryDate << product.measure << product.amount;
+	return out;
+}
+
+istream& operator>>(istream& in, Product& product)
+{
+	in >> product.name >> product.producedBy >> product.comment;
+	in >> product.acceptanceDate;
+	in >> product.expiryDate >> product.measure >> product.amount;
+	return in;
+}
+

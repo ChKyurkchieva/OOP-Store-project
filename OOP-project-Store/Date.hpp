@@ -1,13 +1,22 @@
 #include<iostream>
+#include<fstream>
 using std::cout;
 using std::cin;
 using std::endl;
 using std::ostream;
+using std::istream;
+using std::ofstream;
+using std::ifstream;
+using std::fstream;
+using std::nothrow;
+using std::ios;
+
 enum Month
 {
 	January = 1, February, March, April, May, June, July,
 	August, September, October, November, December
 };
+
 class Date
 {
 	Month month;
@@ -15,7 +24,7 @@ class Date
 	unsigned day;
 public:
 	Date();
-	Date(Month month, unsigned day, unsigned year);
+	Date(unsigned day, Month month, unsigned year);
 	Month getMonth()const;
 	unsigned getYear()const;
 	unsigned getDay()const;
@@ -26,8 +35,15 @@ public:
 	unsigned convertToDays()const;
 	bool isLater(const Date& other)const;
 	void print()const;
+	void printInFile(ofstream& stream);
+	void addFromFile(ifstream& stream, const char* filename);
+	void setDateByString(const char* string);
 
 	friend ostream& operator << (ostream& os, const Date& date);
+	friend bool operator==(const Date& lhs, const Date& rhs);
+
+	friend istream& operator>>(istream& is, Date& date);
+	friend istream& operator>>(istream& is, Month& month);
 };
 
 bool isLeap(unsigned year)
@@ -43,14 +59,14 @@ bool isLeap(unsigned year)
 	return false;
 }
 
-bool isValidDate(unsigned int day, unsigned int month, unsigned int year)
+bool isValidDate(unsigned int day, Month month, unsigned int year)
 {
-	if (year > 1990 && year < 2120 && month>0 && month <= 12 && day >= 1 && day <= 31)
+	if (year > 1990 && year < 2120 && month>=January && month <= December && day >= 1 && day <= 31)
 	{
-		if ((month >= 1 && month <= 7 && month % 2 == 1) || (month >= 8 && month <= 12 && month % 2 == 0))
+		if ((month >= January && month <= July && month % 2 == 1) || (month >= August && month <= December && month % 2 == 0))
 			return (day >= 1 && day <= 31);
-		else if (month >= 1 && month <= 7 && month % 2 == 0 || month >= 8 && month <= 12 && month % 2 == 1)
-			return (isLeap(year) && month == 2 && day >= 1 && day <= 29) || (!isLeap(year) && month == 2 && day >= 1 && day <= 28) || (month != 2 && day >= 1 && day <= 30);
+		else if (month >= January && month <= July && month % 2 == 0 || month >= August && month <= December && month % 2 == 1)
+			return (isLeap(year) && month == February && day >= 1 && day <= 29) || (!isLeap(year) && month == February && day >= 1 && day <= 28) || (month != February && day >= 1 && day <= 30);
 		else return false;
 	}
 	else return false;
@@ -63,7 +79,7 @@ Date::Date()
 	this->year = 1990;
 }
 
-Date::Date(Month month, unsigned day, unsigned year)
+Date::Date(unsigned day, Month month, unsigned year)
 {
 	this->day = day;
 	this->month = month;
@@ -119,14 +135,18 @@ unsigned int Date::convertToDays()const
 	result = this->day;
 	for (unsigned i = 1; i < (unsigned)month; i++)
 	{
-		if (this->month >= 1 && this->month <= 7 && this->month % 2 == 1 || this->month >= 8 && this->month <= 12 && this->month % 2 == 0)
+		if (this->month >= January && this->month <= July && this->month % 2 == 1 || this->month >= August && this->month <= December && this->month % 2 == 0)
 			result += 31;
-		else if (this->month >= 1 && this->month <= 7 && this->month % 2 == 0 || this->month >= 8 && this->month <= 12 && this->month % 2 == 1)
+		else if (this->month >= January && this->month <= July && this->month % 2 == 0 || this->month >= August && this->month <= December && this->month % 2 == 1)
 		{
-			if (month == 2 && isLeapYear())
+			if (month == February && isLeapYear())
+			{
 				result += 29;
-			else if (!(month == 2 && isLeapYear()))
+			}
+			else if (!(month == February && isLeapYear()))
+			{
 				result += 28;
+			}
 			else result += 30;
 		}
 	}
@@ -158,5 +178,48 @@ void Date::print()const
 
 ostream& operator << (ostream& os, const Date& date)
 {
-	return os << date.day <<" "<< date.month <<" "<< date.year;
+	return os << date.day <<"/"<< date.month <<"/"<< date.year;
+}
+
+bool operator==(const Date& lhs, const Date& rhs)
+{
+	return ((lhs.year == rhs.year) && (lhs.month == rhs.month) && (lhs.day == rhs.day));
+}
+
+void Date::printInFile(ofstream& stream)
+{
+	stream << this->day << "/"<< this->month << "/" << this->year;
+}
+
+void Date::setDateByString(const char* string)
+{
+	unsigned len = strlen(string);
+	for (unsigned i = 0; i < len; i++)
+	{
+		if (string[i] >= '0' && string[i] <= '9')
+		{ 
+			this->day = string[i];
+		}
+	}
+}
+
+void Date::addFromFile(ifstream& stream,const char* filename)
+{
+	char* buffer = new (nothrow)char [1024];
+	stream.open(filename, ios::in);
+	for (unsigned k = 1; k < 1023; k++)
+	{
+		stream >> buffer[k];
+	}
+	this->setDateByString(buffer);
+	delete[]buffer;
+}
+
+istream& operator>>(istream& is, Date& date)
+{
+	is >> date.day;
+	is >> (char*)date.month;
+	is >> date.year; 
+
+	return is;
 }
