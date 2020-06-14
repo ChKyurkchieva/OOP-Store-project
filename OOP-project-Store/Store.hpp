@@ -18,11 +18,11 @@ public:
 	Store(const Store& other);
 	Store& operator=(const Store& other);
 	~Store();
+
 	void print()const;
 	void printInFile(ofstream& stream);
 	void add(const Product& newProduct);
 	void remove(const Product& productToRemove);
-	void log(const Date& dateFrom, const Date& dateTo);
 	void cleanFromStore(const Date& expiryDate);
 };
 
@@ -173,7 +173,3 @@ void Store::cleanFromStore(const Date& expiryDate)
 	}
 }
 
-void Store::log(const Date& dateFrom, const Date& dateTo)
-{
-
-}

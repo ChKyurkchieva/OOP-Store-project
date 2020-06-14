@@ -16,7 +16,11 @@ enum Month
 	January = 1, February, March, April, May, June, July,
 	August, September, October, November, December
 };
-
+istream& operator >>(istream& is, const Month& month)
+{
+	is >>(char*) month;
+	return is;
+}
 class Date
 {
 	Month month;
@@ -43,7 +47,6 @@ public:
 	friend bool operator==(const Date& lhs, const Date& rhs);
 
 	friend istream& operator>>(istream& is, Date& date);
-	friend istream& operator>>(istream& is, Month& month);
 };
 
 bool isLeap(unsigned year)
