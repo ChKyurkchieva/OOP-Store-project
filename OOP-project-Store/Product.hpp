@@ -55,15 +55,15 @@ public:
 
 void Product::copyFrom(const Product& other)
 {
-	unsigned nameLength = strlen(other.name);
-	this->name = new (nothrow) char[nameLength + 1];
+	int nameLength = strlen(other.name);
+	this->name = new (nothrow) char [nameLength + 1];
 	strcpy(this->name, other.name);
 
-	unsigned producedByLength = strlen(other.producedBy);
+	int producedByLength = strlen(other.producedBy);
 	this->producedBy = new (nothrow) char[producedByLength + 1];
 	strcpy(this->producedBy, other.producedBy);
 
-	unsigned commentLength = strlen(other.comment);
+	int commentLength = strlen(other.comment);
 	this->comment = new (nothrow) char[commentLength + 1];
 	strcpy(this->comment, other.comment);
 

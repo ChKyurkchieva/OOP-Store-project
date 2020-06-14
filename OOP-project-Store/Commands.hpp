@@ -216,14 +216,16 @@ void firstCommand(ofstream& fileStream, int command)
 		{
 		case 1:
 		{
-			open(fileStream); return;
+			open(fileStream); break;
 		}
 		case 2:
 		{
 			char* fileName = new(nothrow) char[MAX_SIZE];
 			cout << "Please, input filename." << endl;
 			cin >> fileName;
-			openFile(fileStream, fileName); return;
+			openFile(fileStream, fileName);
+			delete[] fileName;
+			break;
 		}
 		case 3:
 		{
@@ -280,7 +282,9 @@ void command(ofstream& fileStream, const char* fileName, Store& myStore, int com
 			char* fileName = new(nothrow) char[MAX_SIZE];
 			cout << "Please, input filename." << endl;
 			cin >> fileName;
-			openFile(fileStream, fileName); break;
+			openFile(fileStream, fileName);
+			delete[] fileName;
+			break;
 		}
 		case 3:
 		{
@@ -384,10 +388,6 @@ void run()
 	cin >> command;//i have validation of the input, but it doesn't work; theoritically it have to, in practice it doesn't
 	ofstream fileStream;
 	firstCommand(fileStream, command);
-	if (command == 7)
-	{
-		return;
-	}
 	unsigned action;
 	if (fileStream.is_open())
 	{
